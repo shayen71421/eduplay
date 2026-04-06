@@ -2,22 +2,25 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import FlipText from "@/components/ui/flip-text";
 import HoverOutlineBadge from "@/components/hover-outline-badge";
+import DotGrid from "@/components/DotGrid";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-[#f5f5f7] selection:bg-white selection:text-black">
       <div className="relative isolate flex min-h-screen flex-col overflow-hidden">
+        <div className="pointer-events-auto absolute inset-0 -z-10 h-full w-full">
+          <DotGrid
+            dotSize={3}
+            gap={30}
+            baseColor="#2a2a2a"
+            activeColor="#ffffff"
+            className="h-full w-full"
+            style={{}}
+          />
+        </div>
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_52%_22%,rgba(255,255,255,0.08),transparent_34%),linear-gradient(180deg,#000_0%,#020202_100%)]"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:44px_44px] opacity-[0.08]"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-36 left-1/2 h-[520px] w-[780px] -translate-x-1/2 rounded-full border border-white/20 blur-3xl"
+          className="pointer-events-none absolute -top-36 left-1/2 h-[520px] w-[780px] -translate-x-1/2 rounded-full border border-white/20 blur-3xl -z-5"
         />
 
         <main className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col px-6 pb-20 pt-8 sm:px-10 lg:px-14">
@@ -37,7 +40,7 @@ export default function Home() {
               type="button"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white px-5 py-2.5 text-sm font-medium text-black transition-colors hover:bg-[#e9e9ef]"
             >
-              Join Challenge
+              View Leaderboard
               <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </header>
@@ -88,7 +91,7 @@ export default function Home() {
           </section>
         </main>
 
-        <footer className="relative bg-black py-5">
+        <footer className="relative bg-transparent py-5">
           <div className="mx-auto flex w-full max-w-7xl items-center justify-center px-6 sm:px-10 lg:px-14">
             <p className="text-xs uppercase tracking-[0.08em] text-[#6f6f83] sm:text-sm">
               © 2026 EDSOC Kerala Chapter
