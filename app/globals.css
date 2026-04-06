@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "../components/BorderGlow.css";
+@import "../components/ShapeGrid.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -51,6 +52,43 @@
 
 body {
   font-family: var(--font-geist-sans), "Space Grotesk", "Segoe UI", sans-serif;
+}
+
+.countdown-card {
+  animation: countdown-float 7s ease-in-out infinite;
+}
+
+.countdown-card-sheen {
+  left: -28%;
+  animation: countdown-sheen 6.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+}
+
+@keyframes countdown-sheen {
+  0% {
+    transform: translateX(0) skewX(-12deg);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.75;
+  }
+  45% {
+    transform: translateX(560%) skewX(-12deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(560%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes countdown-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
 .badge-oval-glow {
