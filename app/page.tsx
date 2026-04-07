@@ -1,14 +1,18 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import FlipText from "@/components/ui/flip-text";
 import HoverOutlineBadge from "@/components/hover-outline-badge";
 import DotGrid from "@/components/DotGrid";
 import ShapeGrid from "@/components/ShapeGrid";
 import ChallengeCountdown from "@/components/challenge-countdown";
+import JoinNowAuthButton from "@/components/join-now-auth-button";
+import FirebaseAnalytics from "@/components/firebase-analytics";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-[#f5f5f7] selection:bg-white selection:text-black">
+      <FirebaseAnalytics />
       <div className="relative isolate flex min-h-screen flex-col overflow-hidden">
         <div className="pointer-events-none absolute inset-0 -z-10 h-full w-full sm:hidden">
           <ShapeGrid
@@ -105,29 +109,14 @@ export default function Home() {
             <ChallengeCountdown />
 
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
-              <button
-                type="button"
+              <Link
+                href="/leaderboard"
                 className="inline-flex items-center gap-1.5 rounded-full border border-[#f47a20] bg-[#f47a20] px-4 py-2.5 text-xs font-medium text-black transition-colors hover:bg-[#ff8533] hover:border-[#ff8533] sm:gap-2 sm:px-6 sm:py-3 sm:text-sm"
               >
                 Leaderboard
                 <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-[#f47a20] bg-[#f47a20] px-10 py-3.5 text-sm font-semibold uppercase tracking-[0.08em] text-black shadow-[0_0_0_1px_rgba(244,122,32,0.4),0_10px_28px_rgba(244,122,32,0.4),0_0_30px_rgba(244,122,32,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ff8533] hover:shadow-[0_0_0_1px_rgba(244,122,32,0.6),0_16px_34px_rgba(244,122,32,0.5),0_0_40px_rgba(244,122,32,0.4)] active:translate-y-0 active:scale-[0.99]"
-              >
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.3),transparent_56%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                />
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-all duration-700 group-hover:left-[120%] group-hover:opacity-100"
-                />
-                <span className="relative"> 
-                Join Now
-                </span>
-              </button>
+              </Link>
+              <JoinNowAuthButton className="group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-[#f47a20] bg-[#f47a20] px-10 py-3.5 text-sm font-semibold uppercase tracking-[0.08em] text-black shadow-[0_0_0_1px_rgba(244,122,32,0.4),0_10px_28px_rgba(244,122,32,0.4),0_0_30px_rgba(244,122,32,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ff8533] hover:shadow-[0_0_0_1px_rgba(244,122,32,0.6),0_16px_34px_rgba(244,122,32,0.5),0_0_40px_rgba(244,122,32,0.4)] active:translate-y-0 active:scale-[0.99]" />
             </div>
           </section>
         </main>
