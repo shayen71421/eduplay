@@ -47,6 +47,7 @@ const challengeDays = [
 const CHALLENGE_START_DATE_IST = new Date("2026-04-11T00:00:00+05:30");
 const CHALLENGE_TOTAL_DAYS = challengeDays.length;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const TEST_FORCE_UNLOCK_DAYS: number[] = [];
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -421,7 +422,9 @@ export default function DashboardPage() {
                   </p>
                   <div className="mt-3 grid grid-cols-3 gap-2">
                     {challengeDays.map(item => {
-                      const canPlay = challengeState.phase === "active" && item.day <= challengeState.currentDay;
+                      const canPlay =
+                        (challengeState.phase === "active" && item.day <= challengeState.currentDay) ||
+                        TEST_FORCE_UNLOCK_DAYS.includes(item.day);
                       return (
                         <button
                           key={item.day}
@@ -513,14 +516,18 @@ export default function DashboardPage() {
                     <button
                       key={item.day}
                       type="button"
-                      disabled={challengeState.phase !== "active" || item.day > challengeState.currentDay}
+                      disabled={
+                        !(challengeState.phase === "active" && item.day <= challengeState.currentDay) &&
+                        !TEST_FORCE_UNLOCK_DAYS.includes(item.day)
+                      }
                       onClick={() =>
-                        challengeState.phase === "active" &&
-                        item.day <= challengeState.currentDay &&
+                        ((challengeState.phase === "active" && item.day <= challengeState.currentDay) ||
+                          TEST_FORCE_UNLOCK_DAYS.includes(item.day)) &&
                         router.push(`/dashboard/day-${item.day}`)
                       }
                       className={`rounded-xl border p-4 text-left transition ${
-                        challengeState.phase === "active" && item.day <= challengeState.currentDay
+                        ((challengeState.phase === "active" && item.day <= challengeState.currentDay) ||
+                          TEST_FORCE_UNLOCK_DAYS.includes(item.day))
                           ? item.day === challengeState.currentDay
                             ? "border-[#f47a20] bg-[#1a140f] hover:bg-[#231911]"
                             : "border-[#f47a20]/70 bg-[#121212] hover:bg-[#171717]"
