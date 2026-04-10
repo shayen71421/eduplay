@@ -31,7 +31,7 @@ type OddOneLevel = {
 };
 
 const QUIZ_TIME_SECONDS = 8 * 60;
-const DAY_ONE_START_IST = new Date("2026-04-10T00:00:00+05:30").getTime();
+const DAY_ONE_START_IST = new Date("2026-04-10T21:00:00+05:30").getTime();
 const DAY_ONE_END_IST = DAY_ONE_START_IST + 24 * 60 * 60 * 1000;
 
 const questions: Question[] = [
@@ -231,6 +231,15 @@ export default function DayOnePage() {
       setSubmitting(true);
 
       try {
+        const dayRef = doc(db, "users", user.uid, "days", "day1");
+        const existingDaySubmission = await getDoc(dayRef);
+        if (existingDaySubmission.exists()) {
+          alert("You have already submitted Day 1. Only one submission is allowed.");
+          setSubmitted(true);
+          router.replace("/leaderboard");
+          return;
+        }
+
         const quizCorrect = questions.reduce((correctCount, item, index) => {
           return correctCount + (answers[index] === item.answer ? 1 : 0);
         }, 0);
@@ -252,7 +261,6 @@ export default function DayOnePage() {
         const timeBonusPoints = totalCorrectCount * timeBonusPerCorrect;
         const totalPoints = basePoints + timeBonusPoints;
 
-        const dayRef = doc(db, "users", user.uid, "days", "day1");
         const userRef = doc(db, "users", user.uid);
         const leaderboardRef = doc(db, "leaderboard", user.uid);
 

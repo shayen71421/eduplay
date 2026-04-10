@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-const CHALLENGE_START_DATE_IST = new Date("2026-04-10T00:00:00+05:30").getTime();
+const CHALLENGE_START_DATE_IST = new Date("2026-04-10T21:00:00+05:30").getTime();
 const CHALLENGE_TOTAL_DAYS = 9;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -126,7 +126,7 @@ export default function ChallengeCountdown() {
           <CounterUnit label="Secs" value={units.seconds} />
         </div>
         <p className="mt-3 text-xs text-[#b4bac7] sm:text-sm">
-          Each day is playable only during its own 00:00 to 23:59 IST window.
+          Each day is playable only from 9:00 PM (previous day) to 9:00 PM (current day), IST.
         </p>
       </div>
     </div>

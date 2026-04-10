@@ -44,7 +44,7 @@ const challengeDays = [
   { day: 9, date: "Apr 19" },
 ];
 
-const CHALLENGE_START_DATE_IST = new Date("2026-04-10T00:00:00+05:30");
+const CHALLENGE_START_DATE_IST = new Date("2026-04-10T21:00:00+05:30");
 const CHALLENGE_TOTAL_DAYS = challengeDays.length;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -438,7 +438,7 @@ export default function DashboardPage() {
                       {challengeState.phase === "active"
                         ? `Play Day ${challengeState.currentDay}`
                         : challengeState.phase === "prestart"
-                          ? "Unlocks at 12:00 AM IST"
+                          ? "Unlocks at 9:00 PM IST"
                           : "Challenge Closed"}
                     </p>
                   </button>
@@ -495,7 +495,7 @@ export default function DashboardPage() {
                       {challengeState.phase === "active"
                         ? `Play Day ${challengeState.currentDay}`
                         : challengeState.phase === "prestart"
-                          ? "Unlocks at 12:00 AM IST"
+                          ? "Unlocks at 9:00 PM IST"
                           : "Challenge Closed"}
                     </p>
                   </button>
