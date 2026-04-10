@@ -31,7 +31,7 @@ type OddOneLevel = {
 };
 
 const QUIZ_TIME_SECONDS = 8 * 60;
-const DAY_ONE_START_IST = new Date("2026-04-11T00:00:00+05:30").getTime();
+const DAY_ONE_START_IST = new Date("2026-04-10T00:00:00+05:30").getTime();
 const DAY_ONE_END_IST = DAY_ONE_START_IST + 24 * 60 * 60 * 1000;
 
 const questions: Question[] = [

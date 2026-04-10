@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-const CHALLENGE_START_DATE_IST = new Date("2026-04-11T00:00:00+05:30").getTime();
+const CHALLENGE_START_DATE_IST = new Date("2026-04-10T00:00:00+05:30").getTime();
 const CHALLENGE_TOTAL_DAYS = 9;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
