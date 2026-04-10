@@ -241,10 +241,16 @@ export default function DayOnePage() {
 
         const quizPoints = quizCorrect * QUIZ_POINT_PER_CORRECT;
         const oddPoints = oddCorrectCount * ODD_ONE_POINT_PER_CORRECT;
-        const totalPoints = quizPoints + oddPoints;
+        const basePoints = quizPoints + oddPoints;
+        const totalCorrectCount = quizCorrect + oddCorrectCount;
+        const totalQuestionCount = questions.length + oddOneLevels.length;
 
         const startedAt = startRef.current ?? Date.now();
         const elapsedSeconds = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
+        const remainingSeconds = Math.max(QUIZ_TIME_SECONDS - elapsedSeconds, 0);
+        const timeBonusPerCorrect = Math.floor(remainingSeconds / totalQuestionCount);
+        const timeBonusPoints = totalCorrectCount * timeBonusPerCorrect;
+        const totalPoints = basePoints + timeBonusPoints;
 
         const dayRef = doc(db, "users", user.uid, "days", "day1");
         const userRef = doc(db, "users", user.uid);
@@ -277,6 +283,11 @@ export default function DayOnePage() {
             oddOneSelections: oddSelections,
             oddOneCorrectCount: oddCorrectCount,
             oddOnePoints: oddPoints,
+            basePoints,
+            totalCorrectCount,
+            totalQuestionCount,
+            timeBonusPerCorrect,
+            timeBonusPoints,
             totalPoints,
             elapsedSeconds,
             quizTimeLimitSeconds: QUIZ_TIME_SECONDS,
