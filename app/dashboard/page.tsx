@@ -33,19 +33,21 @@ type UserProfile = {
 };
 
 const challengeDays = [
-  { day: 1, date: "Apr 7" },
-  { day: 2, date: "Apr 8" },
-  { day: 3, date: "Apr 9" },
-  { day: 4, date: "Apr 10" },
-  { day: 5, date: "Apr 11" },
-  { day: 6, date: "Apr 12" },
-  { day: 7, date: "Apr 13" },
-  { day: 8, date: "Apr 14" },
-  { day: 9, date: "Apr 15" },
+  { day: 1, date: "Apr 11" },
+  { day: 2, date: "Apr 12" },
+  { day: 3, date: "Apr 13" },
+  { day: 4, date: "Apr 14" },
+  { day: 5, date: "Apr 15" },
+  { day: 6, date: "Apr 16" },
+  { day: 7, date: "Apr 17" },
+  { day: 8, date: "Apr 18" },
+  { day: 9, date: "Apr 19" },
 ];
 
-const CHALLENGE_START_DATE_UTC = new Date("2026-04-07T00:00:00Z");
+const CHALLENGE_START_DATE_IST = new Date("2026-04-11T00:00:00+05:30");
 const CHALLENGE_TOTAL_DAYS = challengeDays.length;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const TEST_FORCE_UNLOCK_DAYS: number[] = [];
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -57,6 +59,12 @@ export default function DashboardPage() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [rank, setRank] = useState<string | number>("-");
+  const [nowMs, setNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timerId = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(timerId);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async currentUser => {
@@ -116,19 +124,46 @@ export default function DashboardPage() {
     };
   }, [day1Data, rank]);
 
-  const { currentDay, hasStarted } = useMemo(() => {
-    const now = new Date();
-    const elapsedMs = now.getTime() - CHALLENGE_START_DATE_UTC.getTime();
+  const challengeState = useMemo(() => {
+    const startMs = CHALLENGE_START_DATE_IST.getTime();
+    const elapsedMs = nowMs - startMs;
 
     if (elapsedMs < 0) {
-      return { currentDay: 1, hasStarted: false };
+      return {
+        phase: "prestart" as const,
+        currentDay: 1,
+        countdownMs: Math.max(startMs - nowMs, 0),
+        statusText: "Day 1 unlocks in",
+      };
     }
 
-    const dayIndex = Math.floor(elapsedMs / (24 * 60 * 60 * 1000));
-    const boundedDay = Math.min(Math.max(dayIndex + 1, 1), CHALLENGE_TOTAL_DAYS);
+    const dayIndex = Math.floor(elapsedMs / DAY_MS);
+    if (dayIndex >= CHALLENGE_TOTAL_DAYS) {
+      return {
+        phase: "ended" as const,
+        currentDay: CHALLENGE_TOTAL_DAYS,
+        countdownMs: 0,
+        statusText: "Challenge window closed",
+      };
+    }
 
-    return { currentDay: boundedDay, hasStarted: true };
-  }, []);
+    const currentDay = dayIndex + 1;
+    const hasNextDay = currentDay < CHALLENGE_TOTAL_DAYS;
+    const nextMilestoneMs = hasNextDay
+      ? startMs + currentDay * DAY_MS
+      : startMs + CHALLENGE_TOTAL_DAYS * DAY_MS;
+
+    return {
+      phase: "active" as const,
+      currentDay,
+      countdownMs: Math.max(nextMilestoneMs - nowMs, 0),
+      statusText: hasNextDay
+        ? `Day ${currentDay} unlocked. Day ${currentDay + 1} unlocks in`
+        : `Day ${currentDay} unlocked. Challenge ends in`,
+    };
+  }, [nowMs]);
+
+  const countdownText = useMemo(() => formatCountdown(challengeState.countdownMs), [challengeState.countdownMs]);
 
   const displayName = profile.name || user?.displayName || "User";
   const displayEmail = profile.email || user?.email || "";
@@ -366,7 +401,13 @@ export default function DashboardPage() {
                   </button>
                 </div>
               </div>
-            ) : null}
+            ) : (
+              <div className="mt-3 space-y-1 text-xs text-white/70">
+                <p className="font-medium text-white">{displayName}</p>
+                <p>{displayEmail}</p>
+                <p>College: {displayCollege || "Not added. Click avatar to edit."}</p>
+              </div>
+            )}
           </section>
 
           <section className="mx-auto mt-6 grid w-full max-w-6xl gap-6 lg:mt-8 lg:grid-cols-[1fr_320px]">
@@ -374,22 +415,43 @@ export default function DashboardPage() {
               <section className="space-y-3 lg:hidden">
                 <div className="rounded-2xl border border-[#f47a20]/30 bg-[#0b0b0b]/55 p-4 text-center backdrop-blur-[1px]">
                   <h2 className="text-lg font-semibold">Challenge Calendar</h2>
-                  <button
-                    type="button"
-                    disabled={!hasStarted}
-                    onClick={() => hasStarted && router.push(`/dashboard/day-${currentDay}`)}
-                    className={`mt-3 w-full rounded-xl border p-3 text-center transition ${
-                      hasStarted
-                        ? "border-[#f47a20] bg-[#121212] hover:bg-[#171717]"
-                        : "cursor-not-allowed border-white/15 bg-[#101010] opacity-70"
-                    }`}
-                  >
-                    <p className="text-sm text-white/75">Day {currentDay}</p>
-                    <p className="mt-0.5 text-xs text-white/45">{challengeDays[currentDay - 1]?.date}</p>
-                    <p className="mt-2 text-sm font-semibold text-[#f47a20]">
-                      {hasStarted ? "Play Today" : "Starts Soon"}
-                    </p>
-                  </button>
+                  <p className="mt-2 text-xs text-white/65">
+                    {challengeState.phase === "ended"
+                      ? "Challenge window closed"
+                      : `${challengeState.statusText} ${countdownText}`}
+                  </p>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {challengeDays.map(item => {
+                      const canPlay =
+                        (challengeState.phase === "active" && item.day <= challengeState.currentDay) ||
+                        TEST_FORCE_UNLOCK_DAYS.includes(item.day);
+                      return (
+                        <button
+                          key={item.day}
+                          type="button"
+                          disabled={!canPlay}
+                          onClick={() => canPlay && router.push(`/dashboard/day-${item.day}`)}
+                          className={`rounded-lg border p-2 text-center transition ${
+                            canPlay
+                              ? item.day === challengeState.currentDay
+                                ? "border-[#f47a20] bg-[#1a140f]"
+                                : "border-[#f47a20]/60 bg-[#121212]"
+                              : "cursor-not-allowed border-white/15 bg-[#101010] opacity-70"
+                          }`}
+                        >
+                          <p className="text-xs text-white/75">Day {item.day}</p>
+                          <p className="mt-0.5 text-[10px] text-white/45">{item.date}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-2 text-xs font-semibold text-[#f47a20]">
+                    {challengeState.phase === "active"
+                      ? `Play days 1-${challengeState.currentDay}`
+                      : challengeState.phase === "prestart"
+                        ? "Unlocks at 12:00 AM IST"
+                        : "Challenge Closed"}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -417,22 +479,34 @@ export default function DashboardPage() {
 
               <section className="hidden rounded-2xl border border-[#f47a20]/30 bg-[#0b0b0b]/60 p-4 sm:p-6 backdrop-blur-[1px] lg:block">
                 <h2 className="text-xl font-semibold">Challenge Calendar</h2>
+                <p className="mt-2 text-sm text-white/65">
+                  {challengeState.phase === "ended"
+                    ? "Challenge window closed"
+                    : `${challengeState.statusText} ${countdownText}`}
+                </p>
 
                 <div className="mt-4 sm:hidden">
                   <button
                     type="button"
-                    disabled={!hasStarted}
-                    onClick={() => hasStarted && router.push(`/dashboard/day-${currentDay}`)}
+                    disabled={challengeState.phase !== "active"}
+                    onClick={() =>
+                      challengeState.phase === "active" &&
+                      router.push(`/dashboard/day-${challengeState.currentDay}`)
+                    }
                     className={`w-full rounded-xl border p-4 text-left transition ${
-                      hasStarted
+                      challengeState.phase === "active"
                         ? "border-[#f47a20] bg-[#121212] hover:bg-[#171717]"
                         : "cursor-not-allowed border-white/15 bg-[#101010] opacity-70"
                     }`}
                   >
-                    <p className="text-sm text-white/70">Day {currentDay}</p>
-                    <p className="mt-1 text-xs text-white/45">{challengeDays[currentDay - 1]?.date}</p>
+                    <p className="text-sm text-white/70">Day {challengeState.currentDay}</p>
+                    <p className="mt-1 text-xs text-white/45">{challengeDays[challengeState.currentDay - 1]?.date}</p>
                     <p className="mt-3 text-sm font-semibold text-[#f47a20]">
-                      {hasStarted ? "Play Today" : "Starts Soon"}
+                      {challengeState.phase === "active"
+                        ? `Play Day ${challengeState.currentDay}`
+                        : challengeState.phase === "prestart"
+                          ? "Unlocks at 12:00 AM IST"
+                          : "Challenge Closed"}
                     </p>
                   </button>
                 </div>
@@ -442,13 +516,19 @@ export default function DashboardPage() {
                     <button
                       key={item.day}
                       type="button"
-                      disabled={!hasStarted || item.day > currentDay}
+                      disabled={
+                        !(challengeState.phase === "active" && item.day <= challengeState.currentDay) &&
+                        !TEST_FORCE_UNLOCK_DAYS.includes(item.day)
+                      }
                       onClick={() =>
-                        hasStarted && item.day <= currentDay && router.push(`/dashboard/day-${item.day}`)
+                        ((challengeState.phase === "active" && item.day <= challengeState.currentDay) ||
+                          TEST_FORCE_UNLOCK_DAYS.includes(item.day)) &&
+                        router.push(`/dashboard/day-${item.day}`)
                       }
                       className={`rounded-xl border p-4 text-left transition ${
-                        hasStarted && item.day <= currentDay
-                          ? item.day === currentDay
+                        ((challengeState.phase === "active" && item.day <= challengeState.currentDay) ||
+                          TEST_FORCE_UNLOCK_DAYS.includes(item.day))
+                          ? item.day === challengeState.currentDay
                             ? "border-[#f47a20] bg-[#1a140f] hover:bg-[#231911]"
                             : "border-[#f47a20]/70 bg-[#121212] hover:bg-[#171717]"
                           : "cursor-not-allowed border-white/15 bg-[#101010] opacity-55"
@@ -629,4 +709,18 @@ function BadgeCard({
       <p className="mt-1 text-[11px] text-white/60 sm:text-xs">{hint}</p>
     </article>
   );
+}
+
+function formatCountdown(ms: number) {
+  const totalSeconds = Math.max(Math.floor(ms / 1000), 0);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (days > 0) {
+    return `${days}d ${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
+  }
+
+  return `${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
 }
